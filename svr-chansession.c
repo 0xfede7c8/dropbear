@@ -370,11 +370,15 @@ static void chansessionrequest(struct Channel *channel) {
 
 	if (strcmp(type, "window-change") == 0) {
 		ret = sessionwinchange(chansess);
-	} else if (strcmp(type, "shell") == 0) {
+	} 
+#if DROPBEAR_SHELL
+	else if (strcmp(type, "shell") == 0) {
 		ret = sessioncommand(channel, chansess, 0, 0);
 	} else if (strcmp(type, "pty-req") == 0) {
 		ret = sessionpty(chansess);
-	} else if (strcmp(type, "exec") == 0) {
+	} 
+#endif
+	else if (strcmp(type, "exec") == 0) {
 		ret = sessioncommand(channel, chansess, 1, 0);
 	} else if (strcmp(type, "subsystem") == 0) {
 		ret = sessioncommand(channel, chansess, 1, 1);

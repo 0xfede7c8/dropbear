@@ -292,4 +292,10 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 /* The default path. This will often get replaced by the shell */
 #define DEFAULT_PATH "/usr/bin:/bin"
 
+/* Enable the terminal execution from the client. */
+#define DROPBEAR_TERMINAL 1
+
+/* Limit the amount of total connections allowes. 0 means infinite */
+#define MAX_TOTAL_CONNECTIONS 0
+
 #endif /* DROPBEAR_DEFAULT_OPTIONS_H_ */

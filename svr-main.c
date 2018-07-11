@@ -176,8 +176,13 @@ static void main_noinetd() {
 	}
 
 	/* incoming connection select loop */
+	unsigned int connection_number = 0u;
 	for(;;) {
 
+		if (connection_number == MAX_TOTAL_CONNECTIONS)
+		{
+			dropbear_exit("Max connections reached. Terminated");
+		}
 		FD_ZERO(&fds);
 		
 		/* listening sockets */
