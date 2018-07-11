@@ -1,8 +1,6 @@
 #ifndef LOCALOPTIONS_H
 #define LOCALOPTIONS_H
 
-#define DROPBEAR_DEFPORT "41414"
-
 //Should be changed
 #define DSS_PRIV_FILENAME "/etc/dropbear/dropbear_dss_host_key"
 #define RSA_PRIV_FILENAME "/etc/dropbear/dropbear_rsa_host_key"
@@ -49,5 +47,7 @@
 #define DROPBEAR_TERMINAL 0
 
 #define MAX_TOTAL_CONNECTIONS 1
+
+#define DROPBEAR_DH_GROUP1_CLIENTONLY 0
 
 #endif /* LOCALOPTIONS_H */
