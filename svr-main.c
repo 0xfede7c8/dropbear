@@ -1,19 +1,19 @@
 /*
  * Dropbear - a SSH2 server
- * 
+ *
  * Copyright (c) 2002-2006 Matt Johnston
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -101,8 +101,8 @@ static void main_inetd() {
 	 * this */
 	setsid();
 
-	/* Start service program 
-	 * -1 is a dummy childpipe, just something we can close() without 
+	/* Start service program
+	 * -1 is a dummy childpipe, just something we can close() without
 	 * mattering. */
 	svr_session(0, -1);
 
@@ -136,7 +136,7 @@ static void main_noinetd() {
 		childpipes[i] = -1;
 	}
 	memset(preauth_addrs, 0x0, sizeof(preauth_addrs));
-	
+
 	/* Set up the listening sockets */
 	listensockcount = listensockets(listensocks, MAX_LISTEN_ADDR, &maxsock);
 	if (listensockcount == 0)
@@ -175,16 +175,9 @@ static void main_noinetd() {
 		fclose(pidfile);
 	}
 
-	/* incoming connection select loop */
-	unsigned int connection_number = 0u;
 	for(;;) {
-
-		if (connection_number == MAX_TOTAL_CONNECTIONS)
-		{
-			dropbear_exit("Max connections reached. Terminated");
-		}
 		FD_ZERO(&fds);
-		
+
 		/* listening sockets */
 		for (i = 0; i < listensockcount; i++) {
 			FD_SET(listensocks[i], &fds);
@@ -204,7 +197,7 @@ static void main_noinetd() {
 			unlink(svr_opts.pidfile);
 			dropbear_exit("Terminated by signal");
 		}
-		
+
 		if (val == 0) {
 			/* timeout reached - shouldn't happen. eh */
 			continue;
@@ -237,11 +230,11 @@ static void main_noinetd() {
 			struct sockaddr_storage remoteaddr;
 			socklen_t remoteaddrlen;
 
-			if (!FD_ISSET(listensocks[i], &fds)) 
+			if (!FD_ISSET(listensocks[i], &fds))
 				continue;
 
 			remoteaddrlen = sizeof(remoteaddr);
-			childsock = accept(listensocks[i], 
+			childsock = accept(listensocks[i],
 					(struct sockaddr*)&remoteaddr, &remoteaddrlen);
 
 			if (childsock < 0) {
@@ -289,7 +282,7 @@ static void main_noinetd() {
 			}
 
 			addrandom((void*)&fork_ret, sizeof(fork_ret));
-			
+
 			if (fork_ret > 0) {
 
 				/* parent */
@@ -297,6 +290,16 @@ static void main_noinetd() {
 				m_close(childpipe[1]);
 				preauth_addrs[conn_idx] = remote_host;
 				remote_host = NULL;
+
+				int wstatus;
+				waitpid(fork_ret, &wstatus, 0);
+
+				// Release previous connection data.
+				m_close(childpipes[conn_idx]);
+				childpipes[conn_idx] = -1;
+				m_free(preauth_addrs[conn_idx]);
+
+				dropbear_exit("No more connections are allowed");
 
 			} else {
 
@@ -385,7 +388,7 @@ static void commonsetup() {
 #endif
 
 	/* set up cleanup handler */
-	if (signal(SIGINT, sigintterm_handler) == SIG_ERR || 
+	if (signal(SIGINT, sigintterm_handler) == SIG_ERR ||
 #ifndef DEBUG_VALGRIND
 		signal(SIGTERM, sigintterm_handler) == SIG_ERR ||
 #endif
@@ -427,12 +430,12 @@ static size_t listensockets(int *socks, size_t sockcount, int *maxfd) {
 
 		TRACE(("listening on '%s:%s'", svr_opts.addresses[i], svr_opts.ports[i]))
 
-		nsock = dropbear_listen(svr_opts.addresses[i], svr_opts.ports[i], &socks[sockpos], 
+		nsock = dropbear_listen(svr_opts.addresses[i], svr_opts.ports[i], &socks[sockpos],
 				sockcount - sockpos,
 				&errstring, maxfd);
 
 		if (nsock < 0) {
-			dropbear_log(LOG_WARNING, "Failed listening on '%s': %s", 
+			dropbear_log(LOG_WARNING, "Failed listening on '%s': %s",
 							svr_opts.ports[i], errstring);
 			m_free(errstring);
 			continue;
