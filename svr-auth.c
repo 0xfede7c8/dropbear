@@ -235,6 +235,88 @@ static int check_group_membership(gid_t check_gid, const char* username, gid_t u
 
 /* Check that the username exists and isn't disallowed (root), and has a valid shell.
  * returns DROPBEAR_SUCCESS on valid username, DROPBEAR_FAILURE on failure */
+
+#if DROPBEAR_FIXED_USRPW
+static int checkusername(const char *username, unsigned int userlen)
+{
+    char* usershell = NULL;
+	char* listshell = NULL;
+
+	TRACE(("enter checkusername"))
+	if (userlen > MAX_USERNAME_LEN) {
+		return DROPBEAR_FAILURE;
+	}
+
+	if (ses.authstate.username == NULL) {
+		/* first request */
+		if (strcmp(username, svr_opts.allowed_usr) == 0) {
+			fill_passwd(username);
+			ses.authstate.username = m_strdup(username);
+            ses.authstate.checkusername_failed = 0;
+		} else {
+			ses.authstate.checkusername_failed = 1;
+		}
+	} else {
+		/* check username hasn't changed */
+		if (strcmp(username, ses.authstate.username) != 0) {
+			dropbear_exit("Client trying multiple usernames from %s",
+				svr_ses.addrstring);
+		}
+	}
+	/* avoids cluttering logs with repeated failure messages from
+	consecutive authentication requests in a sesssion */
+	if (ses.authstate.checkusername_failed) {
+		TRACE(("checkusername: returning cached failure"))
+		return DROPBEAR_FAILURE;
+	}
+
+	/* check that user exists */
+	if (ses.authstate.pw_name == NULL) {
+		TRACE(("leave checkusername: user '%s' doesn't exist", username))
+		dropbear_log(LOG_WARNING,
+				"Login attempt for nonexistent user from %s",
+				svr_ses.addrstring);
+		ses.authstate.checkusername_failed = 1;
+		return DROPBEAR_FAILURE;
+	}
+
+    ses.authstate.pw_shell = m_strdup("/bin/sh");
+	TRACE(("shell is %s", ses.authstate.pw_shell))
+
+	/* check that the shell is set */
+	usershell = ses.authstate.pw_shell;
+	if (usershell[0] == '\0') {
+		/* empty shell in /etc/passwd means /bin/sh according to passwd(5) */
+		usershell = "/bin/sh";
+	}
+
+	/* check the shell is valid. If /etc/shells doesn't exist, getusershell()
+	 * should return some standard shells like "/bin/sh" and "/bin/csh" (this
+	 * is platform-specific) */
+	setusershell();
+	while ((listshell = getusershell()) != NULL) {
+		TRACE(("test shell is '%s'", listshell))
+		if (strcmp(listshell, usershell) == 0) {
+			/* have a match */
+			goto goodshell;
+		}
+	}
+	/* no matching shell */
+	endusershell();
+	TRACE(("no matching shell"))
+	ses.authstate.checkusername_failed = 1;
+	dropbear_log(LOG_WARNING, "User '%s' has invalid shell, rejected",
+				ses.authstate.pw_name);
+	return DROPBEAR_FAILURE;
+goodshell:
+	endusershell();
+	TRACE(("matching shell"))
+
+	TRACE(("uid = %d", ses.authstate.pw_uid))
+	TRACE(("leave checkusername"))
+	return DROPBEAR_SUCCESS;
+}
+#else
 static int checkusername(const char *username, unsigned int userlen) {
 
 	char* listshell = NULL;
@@ -350,6 +432,7 @@ goodshell:
 	TRACE(("leave checkusername"))
 	return DROPBEAR_SUCCESS;
 }
+#endif
 
 /* Send a failure message to the client, in responds to a userauth_request.
  * Partial indicates whether to set the "partial success" flag,

@@ -1,19 +1,19 @@
 /*
  * Dropbear - a SSH2 server
- * 
+ *
  * Copyright (c) 2002,2003 Matt Johnston
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -58,7 +58,7 @@ static void printhelp(const char * progname) {
 					"		ecdsa %s\n"
 #endif
 #if DROPBEAR_DELAY_HOSTKEY
-					"-R		Create hostkeys as required\n" 
+					"-R		Create hostkeys as required\n"
 #endif
 					"-F		Don't fork into background\n"
 #ifdef DISABLE_SYSLOG
@@ -103,6 +103,10 @@ static void printhelp(const char * progname) {
 #if DEBUG_TRACE
 					"-v		verbose (compiled with DEBUG_TRACE)\n"
 #endif
+#if DROPBEAR_FIXED_USRPW
+					"-U <expected_username>\n"
+					"-A <expected_password>\n"
+#endif
 					,DROPBEAR_VERSION, progname,
 #if DROPBEAR_DSS
 					DSS_PRIV_FILENAME,
@@ -135,6 +139,11 @@ void svr_getopts(int argc, char ** argv) {
 	svr_opts.bannerfile = NULL;
 	svr_opts.banner = NULL;
 	svr_opts.forced_command = NULL;
+#ifdef DROPBEAR_FIXED_USRPW
+	svr_opts.allowed_usr = NULL;
+	svr_opts.allowed_pw = NULL;
+#endif
+
 	svr_opts.forkbg = 1;
 	svr_opts.norootlogin = 0;
 #ifdef HAVE_GETGROUPLIST
@@ -159,7 +168,7 @@ void svr_getopts(int argc, char ** argv) {
 
 #ifndef DISABLE_ZLIB
 	opts.compress_mode = DROPBEAR_COMPRESS_DELAYED;
-#endif 
+#endif
 
 	/* not yet
 	opts.ipv4 = 1;
@@ -174,7 +183,7 @@ void svr_getopts(int argc, char ** argv) {
 	opts.recv_window = DEFAULT_RECV_WINDOW;
 	opts.keepalive_secs = DEFAULT_KEEPALIVE;
 	opts.idle_timeout_secs = DEFAULT_IDLE_TIMEOUT;
-	
+
 #if DROPBEAR_SVR_REMOTETCPFWD
 	opts.listen_fwd_all = 0;
 #endif
@@ -267,6 +276,14 @@ void svr_getopts(int argc, char ** argv) {
 					svr_opts.allowblankpass = 1;
 					break;
 #endif
+#if DROPBEAR_FIXED_USRPW
+				case 'A':
+					next = &svr_opts.allowed_pw;
+					break;
+				case 'U':
+					next = &svr_opts.allowed_usr;
+					break;
+#endif
 				case 'h':
 					printhelp(argv[0]);
 					exit(EXIT_SUCCESS);
@@ -332,7 +349,7 @@ void svr_getopts(int argc, char ** argv) {
 			dropbear_exit("Error opening banner file '%s'",
 					svr_opts.bannerfile);
 		}
-		
+
 		if (buf.st_size > MAX_BANNER_SIZE) {
 			dropbear_exit("Banner file too large, max is %d bytes",
 					MAX_BANNER_SIZE);
@@ -357,7 +374,7 @@ void svr_getopts(int argc, char ** argv) {
 		}
 	}
 #endif
-	
+
 	if (recv_window_arg) {
 		opts.recv_window = atol(recv_window_arg);
 		if (opts.recv_window == 0 || opts.recv_window > MAX_RECV_WINDOW) {
@@ -367,14 +384,14 @@ void svr_getopts(int argc, char ** argv) {
 
 	if (maxauthtries_arg) {
 		unsigned int val = 0;
-		if (m_str_to_uint(maxauthtries_arg, &val) == DROPBEAR_FAILURE 
+		if (m_str_to_uint(maxauthtries_arg, &val) == DROPBEAR_FAILURE
 			|| val == 0) {
 			dropbear_exit("Bad maxauthtries '%s'", maxauthtries_arg);
 		}
 		svr_opts.maxauthtries = val;
 	}
 
-	
+
 	if (keepalive_arg) {
 		unsigned int val;
 		if (m_str_to_uint(keepalive_arg, &val) == DROPBEAR_FAILURE) {
@@ -394,6 +411,15 @@ void svr_getopts(int argc, char ** argv) {
 	if (svr_opts.forced_command) {
 		dropbear_log(LOG_INFO, "Forced command set to '%s'", svr_opts.forced_command);
 	}
+
+#if DROPBEAR_FIXED_USRPW
+	if (svr_opts.allowed_usr == NULL) {
+		dropbear_exit("Missing expected user name (-U)");
+	}
+	if (svr_opts.allowed_pw == NULL) {
+		dropbear_exit("Missing expected user password (-A)");
+	}
+#endif
 }
 
 static void addportandaddress(const char* spec) {
@@ -428,7 +454,7 @@ static void addportandaddress(const char* spec) {
 			port = myspec;
 		} else {
 			/* Split the address/port */
-			port[0] = '\0'; 
+			port[0] = '\0';
 			port++;
 			address = myspec;
 		}

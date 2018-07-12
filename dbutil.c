@@ -1,19 +1,19 @@
 /*
  * Dropbear - a SSH2 server
- * 
+ *
  * Copyright (c) 2002,2003 Matt Johnston
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -69,9 +69,9 @@
 
 #define MAX_FMT 100
 
-static void generic_dropbear_exit(int exitcode, const char* format, 
+static void generic_dropbear_exit(int exitcode, const char* format,
 		va_list param) ATTRIB_NORETURN;
-static void generic_dropbear_log(int priority, const char* format, 
+static void generic_dropbear_log(int priority, const char* format,
 		va_list param);
 
 void (*_dropbear_exit)(int exitcode, const char* format, va_list param) ATTRIB_NORETURN
@@ -111,7 +111,7 @@ void dropbear_exit(const char* format, ...) {
 	va_end(param);
 }
 
-static void generic_dropbear_exit(int exitcode, const char* format, 
+static void generic_dropbear_exit(int exitcode, const char* format,
 		va_list param) {
 
 	char fmtbuf[300];
@@ -127,7 +127,7 @@ void fail_assert(const char* expr, const char* file, int line) {
 	dropbear_exit("Failed assertion (%s:%d): `%s'", file, line, expr);
 }
 
-static void generic_dropbear_log(int UNUSED(priority), const char* format, 
+static void generic_dropbear_log(int UNUSED(priority), const char* format,
 		va_list param) {
 
 	char printbuf[1024];
@@ -407,7 +407,7 @@ char * stripcontrol(const char * text) {
 	char * ret;
 	int len, pos;
 	int i;
-	
+
 	len = strlen(text);
 	ret = m_malloc(len+1);
 
@@ -422,7 +422,7 @@ char * stripcontrol(const char * text) {
 	ret[pos] = 0x0;
 	return ret;
 }
-			
+
 
 /* reads the contents of filename into the buffer buf, from the current
  * position, either to the end of the file, or the buffer being full.
@@ -439,7 +439,7 @@ int buf_readfile(buffer* buf, const char* filename) {
 	if (fd < 0) {
 		goto out;
 	}
-	
+
 	do {
 		maxlen = buf->size - buf->pos;
 		len = read(fd, buf_getwriteptr(buf, maxlen), maxlen);
@@ -499,7 +499,7 @@ out:
 		return DROPBEAR_SUCCESS;
 	}
 
-}	
+}
 #endif
 
 /* make sure that the socket closes */
@@ -519,7 +519,7 @@ void m_close(int fd) {
 		dropbear_exit("Error closing fd %d, %s", fd, strerror(errno));
 	}
 }
-	
+
 void * m_malloc(size_t size) {
 
 	void* ret;
@@ -649,14 +649,14 @@ static clockid_t get_linux_clock_source() {
 	}
 	return -1;
 }
-#endif 
+#endif
 
 time_t monotonic_now() {
 #if defined(__linux__) && defined(SYS_clock_gettime)
 	static clockid_t clock_source = -2;
 
 	if (clock_source == -2) {
-		/* First run, find out which one works. 
+		/* First run, find out which one works.
 		-1 will fall back to time() */
 		clock_source = get_linux_clock_source();
 	}
