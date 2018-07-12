@@ -692,7 +692,7 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 			}
 			#if DROPBEAR_ONLY_ALLOW_EXEC_SCP
 				#if DROPBEAR_EXEC_REQUEST
-					if (strncmp(chansess->cmd, "scp", 3u) != 0)
+					if (strcmp(chansess->cmd, "scp") != 0)
 					{
 						#if LOG_COMMANDS
 							dropbear_log(LOG_WARNING, "User %s trying to execute '%s'. Only allowed command is scp. Aborting.", 
