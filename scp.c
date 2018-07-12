@@ -1,4 +1,4 @@
-/* Dropbear Note: This file is based on OpenSSH 4.3p2. Avoid unnecessary 
+/* Dropbear Note: This file is based on OpenSSH 4.3p2. Avoid unnecessary
    changes to simplify future updates */
 
 /*
@@ -185,7 +185,7 @@ arg_setup(char *host, char *remuser, char *cmd)
 }
 
 int
-do_cmd(char *host, char *remuser, char *cmd, int *fdin, int *fdout, int argc)
+do_cmd(char *host, char *remuser, char *cmd, int *fdin, int *fdout)
 {
 	int pin[2], pout[2], reserved[2];
 
@@ -199,7 +199,8 @@ do_cmd(char *host, char *remuser, char *cmd, int *fdin, int *fdout, int argc)
 	 * Reserve two descriptors so that the real pipes won't get
 	 * descriptors 0 and 1 because that will screw up dup2 below.
 	 */
-	pipe(reserved);
+	if (pipe(reserved) < 0)
+		fatal("pipe: %s", strerror(errno));
 
 	/* Create a socket pair for communicating with ssh. */
 	if (pipe(pin) < 0)
@@ -533,7 +534,7 @@ toremote(char *targ, int argc, char **argv)
 				(void) snprintf(bp, len, "%s -t %s", cmd, targ);
 				host = cleanhostname(thost);
 				if (do_cmd(host, tuser, bp, &remin,
-				    &remout, argc) < 0)
+				    &remout) < 0)
 					exit(1);
 				if (response() < 0)
 					exit(1);
@@ -584,7 +585,7 @@ tolocal(int argc, char **argv)
 		len = strlen(src) + CMDNEEDS + 20;
 		bp = xmalloc(len);
 		(void) snprintf(bp, len, "%s -f %s", cmd, src);
-		if (do_cmd(host, suser, bp, &remin, &remout, argc) < 0) {
+		if (do_cmd(host, suser, bp, &remin, &remout) < 0) {
 			(void) xfree(bp);
 			++errs;
 			continue;
@@ -602,8 +603,8 @@ source(int argc, char **argv)
 	struct stat stb;
 	static BUF buffer;
 	BUF *bp;
-	off_t i, amt, statbytes;
-	size_t result;
+	off_t i, statbytes;
+	size_t amt, result;
 	int fd = -1, haderr, indx;
 	char *last, *name, buf[2048];
 	int len;
@@ -679,7 +680,7 @@ next:			if (fd != -1) {
 		/* Keep writing after an error so that we stay sync'd up. */
 		for (haderr = i = 0; i < stb.st_size; i += bp->cnt) {
 			amt = bp->cnt;
-			if (i + amt > stb.st_size)
+			if (i + amt > (size_t)stb.st_size)
 				amt = stb.st_size - i;
 			if (!haderr) {
 				result = atomicio(read, fd, bp->buf, amt);
@@ -1235,6 +1236,7 @@ allocbuf(BUF *bp, int fd, int blksize)
 		size = blksize;
 #else /* HAVE_STRUCT_STAT_ST_BLKSIZE */
 	size = blksize;
+    (void)fd;
 #endif /* HAVE_STRUCT_STAT_ST_BLKSIZE */
 	if (bp->cnt >= size)
 		return (bp);
@@ -1251,7 +1253,7 @@ void
 lostconn(int signo)
 {
 	if (!iamremote)
-		write(STDERR_FILENO, "lost connection\n", 16);
+		dprintf(STDERR_FILENO, "lost connection\n");
 	if (signo)
 		_exit(1);
 	else

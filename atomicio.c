@@ -1,7 +1,7 @@
 /* $OpenBSD: atomicio.c,v 1.17 2006/04/01 05:51:34 djm Exp $ */
 /*
  * Copied from OpenSSH/OpenBSD.
- * 
+ *
  * Copyright (c) 2005 Anil Madhavapeddy. All rights reserved.
  * Copyright (c) 1995,1999 Theo de Raadt.  All rights reserved.
  * All rights reserved.
@@ -52,7 +52,12 @@ atomicio(ssize_t (*f) (int, void *, size_t), int fd, void *_s, size_t n)
 			errno = EPIPE;
 			return pos;
 		default:
-			pos += (size_t)res;
+			if (pos > 0)
+				pos += (size_t)res;
+			else {
+				errno = EIO;
+				return pos;
+			}
 		}
 	}
 	return (pos);

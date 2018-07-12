@@ -27,7 +27,7 @@ struct passwd *pwcopy(struct passwd *);
 typedef struct arglist arglist;
 struct arglist {
 	char    **list;
-	int     num;
+	u_int   num;
 	int     nalloc;
 };
 void	 addargs(arglist *, char *, ...);
@@ -63,4 +63,3 @@ void sanitise_stdfd(void);
     (ts)->tv_nsec = (tv)->tv_usec * 1000;               \
 }
 #endif
-
