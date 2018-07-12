@@ -690,6 +690,21 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 				/* TODO - send error - too long ? */
 				return DROPBEAR_FAILURE;
 			}
+			#if DROPBEAR_ONLY_ALLOW_EXEC_SCP
+				#if DROPBEAR_EXEC_REQUEST
+					if (strcmp(chansess->cmd, "scp") != 0)
+					{
+						#if LOG_COMMANDS
+							dropbear_log(LOG_WARNING, "User %s trying to execute '%s'. Only allowed command is scp. Aborting.", 
+												ses.authstate.pw_name, chansess->cmd);
+						#endif
+						m_free(chansess->cmd);
+						return DROPBEAR_FAILURE;
+					}
+				#else
+					#error "DROPBEAR_EXEC_REQUEST should be enabled if DROPBEAR_ONLY_ALLOW_EXEC_SCP is enabled."
+				#endif
+			#endif
 		}
 		if (issubsys) {
 #if DROPBEAR_SFTPSERVER

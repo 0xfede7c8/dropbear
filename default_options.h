@@ -300,6 +300,9 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 /* Enable Authentication Agent Forwarding */
 #define DROPBEAR_SVR_AGENTFWD 1
 
+/* Allows only to receive a SCP command. DROPBEAR_EXEC_REQUEST should be enabled*/
+#define DROPBEAR_ONLY_ALLOW_EXEC_SCP 0
+
 /* Limit the amount of total connections allowed. 0 means infinite */
 #define MAX_TOTAL_CONNECTIONS 0
 
