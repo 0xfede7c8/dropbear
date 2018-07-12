@@ -367,32 +367,57 @@ static void chansessionrequest(struct Channel *channel) {
 	chansess = (struct ChanSess*)channel->typedata;
 	dropbear_assert(chansess != NULL);
 	TRACE(("type is %s", type))
-
-	if (strcmp(type, "window-change") == 0) {
+	if(0) {}
+#if DROPBEAR_WINDOW_CHANGE_REQUEST
+	else if (strcmp(type, "window-change") == 0)
+	{
 		ret = sessionwinchange(chansess);
 	} 
-#if DROPBEAR_SHELL
-	else if (strcmp(type, "shell") == 0) {
+#endif
+#if DROPBEAR_SHELL_REQUEST
+	else if (strcmp(type, "shell") == 0)
+	{
 		ret = sessioncommand(channel, chansess, 0, 0);
-	} else if (strcmp(type, "pty-req") == 0) {
+	} 
+#endif
+#if DROPBEAT_PTY_REQUEST
+	else if (strcmp(type, "pty-req") == 0)
+	{
 		ret = sessionpty(chansess);
 	} 
 #endif
-	else if (strcmp(type, "exec") == 0) {
+#if DROPBEAR_EXEC_REQUEST
+	else if (strcmp(type, "exec") == 0) 
+	{
 		ret = sessioncommand(channel, chansess, 1, 0);
-	} else if (strcmp(type, "subsystem") == 0) {
+	}
+#endif 
+#if DROPBEAR_SUBSYSTEM_REQUEST
+else if (strcmp(type, "subsystem") == 0)
+	{
 		ret = sessioncommand(channel, chansess, 1, 1);
+	}
+#endif
 #if DROPBEAR_X11FWD
-	} else if (strcmp(type, "x11-req") == 0) {
+	else if (strcmp(type, "x11-req") == 0)
+	{
 		ret = x11req(chansess);
+	}
 #endif
 #if DROPBEAR_SVR_AGENTFWD
-	} else if (strcmp(type, "auth-agent-req@openssh.com") == 0) {
+	else if (strcmp(type, "auth-agent-req@openssh.com") == 0)
+	{
 		ret = svr_agentreq(chansess);
+	}
 #endif
-	} else if (strcmp(type, "signal") == 0) {
+#if DROPBEAR_SIGNAL_REQUEST 
+	else if (strcmp(type, "signal") == 0)
+	{
 		ret = sessionsignal(chansess);
-	} else {
+	}
+#endif
+	else 
+	{
 		/* etc, todo "env", "subsystem" */
 	}
 
