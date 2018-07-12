@@ -1,3 +1,6 @@
+Customized Dropbear downsized to a 1-file SCP server.
+----
+
 This is Dropbear, a smallish SSH server and client.
 https://matt.ucc.asn.au/dropbear/dropbear.html
 
