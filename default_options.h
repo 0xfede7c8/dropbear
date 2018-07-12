@@ -46,9 +46,6 @@ IMPORTANT: Some options will require "make clean" after changes */
  * much traffic. */
 #define DROPBEAR_SMALL_CODE 1
 
-/* Enable X11 Forwarding - server only */
-#define DROPBEAR_X11FWD 1
-
 /* Enable TCP Fowarding */
 /* 'Local' is "-L" style (client listening port forwarded via server)
  * 'Remote' is "-R" style (server listening port forwarded via client) */
@@ -59,7 +56,6 @@ IMPORTANT: Some options will require "make clean" after changes */
 #define DROPBEAR_SVR_REMOTETCPFWD 1
 
 /* Enable Authentication Agent Forwarding */
-#define DROPBEAR_SVR_AGENTFWD 1
 #define DROPBEAR_CLI_AGENTFWD 1
 
 /* Note: Both DROPBEAR_CLI_PROXYCMD and DROPBEAR_CLI_NETCAT must be set to
@@ -292,10 +288,18 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 /* The default path. This will often get replaced by the shell */
 #define DEFAULT_PATH "/usr/bin:/bin"
 
-/* Enable the terminal execution from the client. */
-#define DROPBEAR_TERMINAL 1
+/* These define the available request from the user, on SSH connection start. Server only. */
+#define DROPBEAR_WINDOW_CHANGE_REQUEST 1
+#define DROPBEAR_SHELL_REQUEST 1
+#define DROPBEAT_PTY_REQUEST 1
+#define DROPBEAR_EXEC_REQUEST 1
+#define DROPBEAR_SUBSYSTEM_REQUEST 1
+/* Enable X11 Forwarding - server only */
+#define DROPBEAR_X11FWD 1
+/* Enable Authentication Agent Forwarding */
+#define DROPBEAR_SVR_AGENTFWD 1
 
-/* Limit the amount of total connections allowes. 0 means infinite */
+/* Limit the amount of total connections allowed. 0 means infinite */
 #define MAX_TOTAL_CONNECTIONS 0
 
 #endif /* DROPBEAR_DEFAULT_OPTIONS_H_ */
