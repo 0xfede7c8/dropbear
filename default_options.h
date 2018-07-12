@@ -294,6 +294,7 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 #define DROPBEAT_PTY_REQUEST 1
 #define DROPBEAR_EXEC_REQUEST 1
 #define DROPBEAR_SUBSYSTEM_REQUEST 1
+#define DROPBEAR_SIGNAL_REQUEST 1
 /* Enable X11 Forwarding - server only */
 #define DROPBEAR_X11FWD 1
 /* Enable Authentication Agent Forwarding */

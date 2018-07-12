@@ -367,13 +367,12 @@ static void chansessionrequest(struct Channel *channel) {
 	chansess = (struct ChanSess*)channel->typedata;
 	dropbear_assert(chansess != NULL);
 	TRACE(("type is %s", type))
+	if(0) {}
 #if DROPBEAR_WINDOW_CHANGE_REQUEST
 	if (strcmp(type, "window-change") == 0)
 	{
 		ret = sessionwinchange(chansess);
 	} 
-#else
-	if(0) {}
 #endif
 #if DROPBEAR_SHELL_REQUEST
 	else if (strcmp(type, "shell") == 0)
@@ -411,10 +410,14 @@ else if (strcmp(type, "subsystem") == 0)
 		ret = svr_agentreq(chansess);
 	}
 #endif
+#if DROPBEAR_SIGNAL_REQUEST 
 	else if (strcmp(type, "signal") == 0)
 	{
 		ret = sessionsignal(chansess);
-	} else {
+	}
+#endif
+	else 
+	{
 		/* etc, todo "env", "subsystem" */
 	}
 
