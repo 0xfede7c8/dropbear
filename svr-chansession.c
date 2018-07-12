@@ -369,7 +369,7 @@ static void chansessionrequest(struct Channel *channel) {
 	TRACE(("type is %s", type))
 	if(0) {}
 #if DROPBEAR_WINDOW_CHANGE_REQUEST
-	if (strcmp(type, "window-change") == 0)
+	else if (strcmp(type, "window-change") == 0)
 	{
 		ret = sessionwinchange(chansess);
 	} 
