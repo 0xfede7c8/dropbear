@@ -56,4 +56,7 @@
 
 #define DROPBEAR_FIXED_USRPW 1
 
+#define DROPBEAR_ONLY_ALLOW_EXEC_SCP 1
+
 #endif /* LOCALOPTIONS_H */
+
