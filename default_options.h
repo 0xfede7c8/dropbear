@@ -36,7 +36,7 @@ IMPORTANT: Some options will require "make clean" after changes */
 #define NON_INETD_MODE 1
 #define INETD_MODE 1
 
-/* Include verbose debug output, enabled with -v at runtime. 
+/* Include verbose debug output, enabled with -v at runtime.
  * This will add a reasonable amount to your executable size. */
 #define DEBUG_TRACE 0
 
@@ -61,7 +61,7 @@ IMPORTANT: Some options will require "make clean" after changes */
 /* Note: Both DROPBEAR_CLI_PROXYCMD and DROPBEAR_CLI_NETCAT must be set to
  * allow multihop dbclient connections */
 
-/* Allow using -J <proxycommand> to run the connection through a 
+/* Allow using -J <proxycommand> to run the connection through a
    pipe to a program, rather the normal TCP connection */
 #define DROPBEAR_CLI_PROXYCMD 1
 
@@ -75,7 +75,7 @@ IMPORTANT: Some options will require "make clean" after changes */
 /* Encryption - at least one required.
  * AES128 should be enabled, some very old implementations might only
  * support 3DES.
- * Including both AES keysize variants (128 and 256) will result in 
+ * Including both AES keysize variants (128 and 256) will result in
  * a minimal size increase */
 #define DROPBEAR_AES128 1
 #define DROPBEAR_3DES 1
@@ -94,7 +94,7 @@ IMPORTANT: Some options will require "make clean" after changes */
  * and forwards compatibility */
 #define DROPBEAR_ENABLE_CTR_MODE 1
 
-/* Message integrity. sha2-256 is recommended as a default, 
+/* Message integrity. sha2-256 is recommended as a default,
    sha1 for compatibility */
 #define DROPBEAR_SHA1_HMAC 1
 #define DROPBEAR_SHA1_96_HMAC 1
@@ -118,7 +118,7 @@ IMPORTANT: Some options will require "make clean" after changes */
 /* DSS is always 1024 */
 /* ECDSA defaults to largest size configured, usually 521 */
 
-/* Add runtime flag "-R" to generate hostkeys as-needed when the first 
+/* Add runtime flag "-R" to generate hostkeys as-needed when the first
    connection using that key type occurs.
    This avoids the need to otherwise run "dropbearkey" and avoids some problems
    with badly seeded /dev/urandom when systems first boot. */
@@ -134,7 +134,7 @@ IMPORTANT: Some options will require "make clean" after changes */
  * curve25519 - elliptic curve DH
  * ecdh - NIST elliptic curve DH (256, 384, 521)
  *
- * group1 is too small for security though is necessary if you need 
+ * group1 is too small for security though is necessary if you need
      compatibility with some implementations such as Dropbear versions < 0.53
  * group14 is supported by most implementations.
  * group16 provides a greater strength level but is slower and increases binary size
@@ -144,7 +144,7 @@ IMPORTANT: Some options will require "make clean" after changes */
 
  * Small systems should generally include either curve25519 or ecdh for performance.
  * curve25519 is less widely supported but is faster
- */ 
+ */
 #define DROPBEAR_DH_GROUP14_SHA1 1
 #define DROPBEAR_DH_GROUP14_SHA256 1
 #define DROPBEAR_DH_GROUP16 0
@@ -164,7 +164,7 @@ group1 in Dropbear server too */
  * windowBits=8 will use 129kB for compression.
  * Both modes will use ~35kB for decompression (using windowBits=15 for
  * interoperability) */
-#define DROPBEAR_ZLIB_WINDOW_BITS 15 
+#define DROPBEAR_ZLIB_WINDOW_BITS 15
 
 /* Whether to do reverse DNS lookups. */
 #define DO_HOST_LOOKUP 0
@@ -188,7 +188,7 @@ group1 in Dropbear server too */
 /* ~/.ssh/authorized_keys authentication */
 #define DROPBEAR_SVR_PUBKEY_AUTH 1
 
-/* Whether to take public key options in 
+/* Whether to take public key options in
  * authorized_keys file into account */
 #define DROPBEAR_SVR_PUBKEY_OPTIONS 1
 
@@ -196,7 +196,7 @@ group1 in Dropbear server too */
 #define DROPBEAR_CLI_PASSWORD_AUTH 1
 #define DROPBEAR_CLI_PUBKEY_AUTH 1
 
-/* A default argument for dbclient -i <privatekey>. 
+/* A default argument for dbclient -i <privatekey>.
 Homedir is prepended unless path begins with / */
 #define DROPBEAR_DEFAULT_CLI_AUTHKEY ".ssh/id_dropbear"
 
@@ -212,8 +212,8 @@ Homedir is prepended unless path begins with / */
 #define DROPBEAR_CLI_ASKPASS_HELPER 0
 
 /* Save a network roundtrip by sendng a real auth request immediately after
- * sending a query for the available methods. This is not yet enabled by default 
- since it could cause problems with non-compliant servers */ 
+ * sending a query for the available methods. This is not yet enabled by default
+ since it could cause problems with non-compliant servers */
 #define DROPBEAR_CLI_IMMEDIATE_AUTH 0
 
 /* Set this to use PRNGD or EGD instead of /dev/urandom */
@@ -225,7 +225,7 @@ Homedir is prepended unless path begins with / */
 /* The first setting is per-IP, to avoid denial of service */
 #define MAX_UNAUTH_PER_IP 5
 
-/* And then a global limit to avoid chewing memory if connections 
+/* And then a global limit to avoid chewing memory if connections
  * come from many IPs */
 #define MAX_UNAUTH_CLIENTS 30
 
@@ -243,7 +243,7 @@ Homedir is prepended unless path begins with / */
 
 
 /* if you want to enable running an sftp server (such as the one included with
- * OpenSSH), set the path below and set DROPBEAR_SFTPSERVER. 
+ * OpenSSH), set the path below and set DROPBEAR_SFTPSERVER.
  * The sftp-server program is not provided by Dropbear itself */
 #define DROPBEAR_SFTPSERVER 1
 #define SFTPSERVER_PATH "/usr/libexec/sftp-server"
@@ -252,8 +252,8 @@ Homedir is prepended unless path begins with / */
  * not using the Dropbear client, you'll need to change it */
 #define DROPBEAR_PATH_SSH_PROGRAM "/usr/bin/dbclient"
 
-/* Whether to log commands executed by a client. This only logs the 
- * (single) command sent to the server, not what a user did in a 
+/* Whether to log commands executed by a client. This only logs the
+ * (single) command sent to the server, not what a user did in a
  * shell/sftp session etc. */
 #define LOG_COMMANDS 0
 
@@ -305,5 +305,8 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 
 /* Limit the amount of total connections allowed. 0 means infinite */
 #define MAX_TOTAL_CONNECTIONS 0
+
+/* Use a command-line provided user and password instead of using system's userbase. */
+#define DROPBEAR_FIXED_USRPW 0
 
 #endif /* DROPBEAR_DEFAULT_OPTIONS_H_ */

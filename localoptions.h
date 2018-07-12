@@ -18,9 +18,9 @@
  * Both of these flags can be defined at once, don't compile without at least
  * one of them. */
 #define NON_INETD_MODE 1
-#define INETD_MODE 1
+#define INETD_MODE 0
 
-/* Include verbose debug output, enabled with -v at runtime. 
+/* Include verbose debug output, enabled with -v at runtime.
  * This will add a reasonable amount to your executable size. */
 #define DEBUG_TRACE 1
 
@@ -32,7 +32,7 @@
 
 #define MAX_UNAUTH_PER_IP 2
 #define MAX_UNAUTH_CLIENTS 4
-#define MAX_AUTH_TRIES 3
+#define MAX_AUTH_TRIES 1
 
 #define DROPBEAR_SFTPSERVER 0
 
@@ -54,6 +54,9 @@
 
 #define DROPBEAR_CLI_AGENTFWD 0
 
+#define DROPBEAR_FIXED_USRPW 1
+
 #define DROPBEAR_ONLY_ALLOW_EXEC_SCP 1
 
 #endif /* LOCALOPTIONS_H */
+
