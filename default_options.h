@@ -309,4 +309,7 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 /* Use a command-line provided user and password instead of using system's userbase. */
 #define DROPBEAR_FIXED_USRPW 0
 
+/* Enables checking of specific location and size to copy files. Path sent by client should match path provided by server options.*/
+#define DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE 0
+
 #endif /* DROPBEAR_DEFAULT_OPTIONS_H_ */

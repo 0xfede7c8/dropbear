@@ -685,28 +685,64 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 		if (chansess->cmd == NULL) {
 			chansess->cmd = buf_getstring(ses.payload, &cmdlen);
 
-			if (cmdlen > MAX_CMD_LEN) {
-				m_free(chansess->cmd);
-				/* TODO - send error - too long ? */
-				return DROPBEAR_FAILURE;
-			}
-			#if DROPBEAR_ONLY_ALLOW_EXEC_SCP
-				#if DROPBEAR_EXEC_REQUEST
-					#define SCP_STRING "scp"
-					if (strncmp(chansess->cmd, SCP_STRING, sizeof(SCP_STRING) - 1) != 0)
-					{
+			#if !DROPBEAR_EXEC_REQUEST && DROPBEAR_ONLY_ALLOW_EXEC_SCP
+				#error "DROPBEAR_EXEC_REQUEST should be enabled if DROPBEAR_ONLY_ALLOW_EXEC_SCP is enabled."
+			#endif
+
+			#if DROPBEAR_EXEC_REQUEST
+				if (cmdlen > MAX_CMD_LEN) {
+					m_free(chansess->cmd);
+					/* TODO - send error - too long ? */
+					return DROPBEAR_FAILURE;
+				}
+
+				#define SCP_STRING "scp"
+				if (strncmp(chansess->cmd, SCP_STRING, sizeof(SCP_STRING) - 1) != 0)
+				{
+					#if DROPBEAR_ONLY_ALLOW_EXEC_SCP
 						#if LOG_COMMANDS
 							dropbear_log(LOG_WARNING, "User %s trying to execute '%s'. Only allowed command is scp. Aborting.",
 												ses.authstate.pw_name, chansess->cmd);
 						#endif
 						m_free(chansess->cmd);
-						return DROPBEAR_FAILURE;
+						return DROPBEAR_FAILURE;	
+					#endif
+				}
+				else
+				{
+					#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+					#define PATH_CHECKING_ARG " -Y "
+					#define MAX_SIZE_CHECKING_ARG " -s "
+					// We append the prefix for SCP to check the path
+					// As buf_getstring allocs a buffer to fit the command as sent, we should realloc it.
+					char* newcmd = malloc(strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG));
+					if (newcmd != NULL)
+					{	
+						strncpy(newcmd, "scp", 4);
+						strcat(newcmd, PATH_CHECKING_ARG);
+						strcat(newcmd, svr_opts.allowed_path);
+						strcat(newcmd, MAX_SIZE_CHECKING_ARG);
+						strcat(newcmd, svr_opts.allowed_max_size); 
+						strcat(newcmd, chansess->cmd + 3); // To discard the "scp"
+						chansess->cmd = newcmd;
 					}
-				#else
-					#error "DROPBEAR_EXEC_REQUEST should be enabled if DROPBEAR_ONLY_ALLOW_EXEC_SCP is enabled."
-				#endif
+					else
+					{
+						TRACE(("Malloc failed."))
+						m_free(chansess->cmd);
+						return DROPBEAR_FAILURE;	
+					}
+					#endif
+				}
+
+
+			#else
+				dropbear_log(LOG_WARNING, "Exec requests disabled. Aborting.");
+				m_free(chansess->cmd);
+				return DROPBEAR_FAILURE;
 			#endif
 		}
+
 		if (issubsys) {
 #if DROPBEAR_SFTPSERVER
 			if ((cmdlen == 4) && strncmp(chansess->cmd, "sftp", 4) == 0) {

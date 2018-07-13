@@ -130,6 +130,11 @@ typedef struct svr_runopts {
 	char * allowed_pw;
 #endif
 
+#ifdef DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+	char* allowed_path;
+	char* allowed_max_size; //char* as we are going only to handle it to another user
+#endif
+
 } svr_runopts;
 
 extern svr_runopts svr_opts;
