@@ -300,7 +300,7 @@ static void main_noinetd() {
 				childpipes[conn_idx] = -1;
 				m_free(preauth_addrs[conn_idx]);
 
-				dropbear_exit("No more connections are allowed");
+				dropbear_close("No more connections are allowed");
 #endif
 
 			} else {
