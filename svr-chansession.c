@@ -711,19 +711,32 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 				else
 				{
 					#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
-					#define PATH_CHECKING_ARG " -Y "
-					#define MAX_SIZE_CHECKING_ARG " -s "
+					#define PATH_CHECKING_ARG "-Y"
+					#define MAX_SIZE_CHECKING_ARG "-s"
+					#define WHITESPACES_EXTRA 4u
 					// We build the command again with the neccessary prefixes.
-					char* newcmd = malloc(strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG));
+					const size_t newcmdsz = strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG) + sizeof(MAX_SIZE_CHECKING_ARG) + WHITESPACES_EXTRA;
+					char* const newcmd = malloc(newcmdsz);
 					if (newcmd != NULL)
 					{	
-						strncpy(newcmd, SCP_STRING, sizeof(SCP_STRING));
-						strcat(newcmd, PATH_CHECKING_ARG);
-						strcat(newcmd, svr_opts.allowed_path);
-						strcat(newcmd, MAX_SIZE_CHECKING_ARG);
-						strcat(newcmd, svr_opts.allowed_max_size); 
-						strcat(newcmd, chansess->cmd + 3); // To discard the "scp"
-						chansess->cmd = newcmd;
+						const int amountWritten = snprintf(newcmd, newcmdsz, "%s %s %s %s %s %s",
+							SCP_STRING,
+							PATH_CHECKING_ARG,
+							svr_opts.allowed_path,
+							MAX_SIZE_CHECKING_ARG,
+							svr_opts.allowed_max_size,
+							chansess->cmd + 4); // To remove the "scp "
+
+						m_free(chansess->cmd);
+						if ((amountWritten > 0) && ((size_t)amountWritten < newcmdsz))
+						{
+							chansess->cmd = newcmd;
+						}
+						else
+						{
+							TRACE(("Couldn't generate new command. snprintf failed"))
+							return DROPBEAR_FAILURE;
+						}
 					}
 					else
 					{

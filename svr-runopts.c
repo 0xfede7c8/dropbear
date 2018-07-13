@@ -446,6 +446,17 @@ void svr_getopts(int argc, char ** argv) {
 	{
 		dropbear_exit("Missing expected max file size (-S)");	
 	}
+	else
+	{
+		size_t i;
+		for (i = 0u; i < strlen(svr_opts.allowed_max_size); ++i)
+		{
+			if (isdigit(svr_opts.allowed_max_size[i]) == 0)
+			{
+				dropbear_exit("Max file size argument not numeric (-S)");
+			}
+		}
+	}
 #endif
 }
 
