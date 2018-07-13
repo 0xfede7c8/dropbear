@@ -713,14 +713,19 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 					#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
 					#define PATH_CHECKING_ARG "-Y"
 					#define MAX_SIZE_CHECKING_ARG "-s"
-					#define WHITESPACES_EXTRA 4u
+					// We call local scp because DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE make it incompatible with standar scp implementations.
+					#ifdef DROPBEAR_MULTI
+						#define SCP_CMD "./dropbearmulti scp"
+					#else
+						#define SCP_CMD "./scp"
+					#endif
 					// We build the command again with the neccessary prefixes.
-					const size_t newcmdsz = strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG) + sizeof(MAX_SIZE_CHECKING_ARG) + WHITESPACES_EXTRA;
+					const size_t newcmdsz = strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG) + sizeof(MAX_SIZE_CHECKING_ARG) + sizeof(SCP_CMD);
 					char* const newcmd = malloc(newcmdsz);
 					if (newcmd != NULL)
 					{	
 						const int amountWritten = snprintf(newcmd, newcmdsz, "%s %s %s %s %s %s",
-							SCP_STRING,
+							SCP_CMD,
 							PATH_CHECKING_ARG,
 							svr_opts.allowed_path,
 							MAX_SIZE_CHECKING_ARG,
@@ -734,6 +739,7 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 						}
 						else
 						{
+							chansess->cmd = NULL;
 							TRACE(("Couldn't generate new command. snprintf failed"))
 							return DROPBEAR_FAILURE;
 						}

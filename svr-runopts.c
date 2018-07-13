@@ -448,13 +448,14 @@ void svr_getopts(int argc, char ** argv) {
 	}
 	else
 	{
-		size_t i;
-		for (i = 0u; i < strlen(svr_opts.allowed_max_size); ++i)
+		size_t i = 0u;
+		while ((svr_opts.allowed_max_size[i] != '\0') && (isdigit(svr_opts.allowed_max_size[i]) != 0))
 		{
-			if (isdigit(svr_opts.allowed_max_size[i]) == 0)
-			{
-				dropbear_exit("Max file size argument not numeric (-S)");
-			}
+			++i;
+		}
+		if (svr_opts.allowed_max_size[i] != '\0')
+		{
+			dropbear_exit("Max file size argument not numeric (-S)");
 		}
 	}
 #endif
