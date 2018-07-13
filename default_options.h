@@ -309,4 +309,9 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 /* Use a command-line provided user and password instead of using system's userbase. */
 #define DROPBEAR_FIXED_USRPW 0
 
+/* Use this to allow just a single synchronous connection, i.e. the application will allow
+just one connection, and it will stay waiting for the end of the connection, after that
+the program will ends. */
+#define DROPBEAR_SINGLE_SYNCH_CONNECTION 0
+
 #endif /* DROPBEAR_DEFAULT_OPTIONS_H_ */
