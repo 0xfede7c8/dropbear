@@ -303,9 +303,6 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 /* Allows only to receive a SCP command. DROPBEAR_EXEC_REQUEST should be enabled*/
 #define DROPBEAR_ONLY_ALLOW_EXEC_SCP 0
 
-/* Limit the amount of total connections allowed. 0 means infinite */
-#define MAX_TOTAL_CONNECTIONS 0
-
 /* Use a command-line provided user and password instead of using system's userbase. */
 #define DROPBEAR_FIXED_USRPW 0
 
