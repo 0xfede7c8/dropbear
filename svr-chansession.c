@@ -713,12 +713,11 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 					#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
 					#define PATH_CHECKING_ARG " -Y "
 					#define MAX_SIZE_CHECKING_ARG " -s "
-					// We append the prefix for SCP to check the path
-					// As buf_getstring allocs a buffer to fit the command as sent, we should realloc it.
+					// We build the command again with the neccessary prefixes.
 					char* newcmd = malloc(strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG));
 					if (newcmd != NULL)
 					{	
-						strncpy(newcmd, "scp", 4);
+						strncpy(newcmd, SCP_STRING, sizeof(SCP_STRING));
 						strcat(newcmd, PATH_CHECKING_ARG);
 						strcat(newcmd, svr_opts.allowed_path);
 						strcat(newcmd, MAX_SIZE_CHECKING_ARG);
