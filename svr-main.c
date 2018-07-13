@@ -291,6 +291,7 @@ static void main_noinetd() {
 				preauth_addrs[conn_idx] = remote_host;
 				remote_host = NULL;
 
+#if DROPBEAR_SINGLE_SYNCH_CONNECTION
 				int wstatus;
 				waitpid(fork_ret, &wstatus, 0);
 
@@ -300,6 +301,7 @@ static void main_noinetd() {
 				m_free(preauth_addrs[conn_idx]);
 
 				dropbear_exit("No more connections are allowed");
+#endif
 
 			} else {
 
