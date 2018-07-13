@@ -449,7 +449,7 @@ void svr_getopts(int argc, char ** argv) {
 	else
 	{
 		size_t i = 0u;
-		while ((svr_opts.allowed_max_size[i] != '\0') && (isdigit(svr_opts.allowed_max_size[i]) != 0))
+		while ((svr_opts.allowed_max_size[i] != '\0') && isdigit(svr_opts.allowed_max_size[i]))
 		{
 			++i;
 		}
