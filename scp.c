@@ -396,8 +396,8 @@ main(int argc, char **argv)
 			setmode(0, O_BINARY);
 #endif
 			break;
+#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
 		case 'Y':
-            fprintf(stderr, "DFG: 'Y': '%s'\n", optarg);
 			expected_file_name = xstrdup(optarg);
 			break;
 		case 's':
@@ -406,6 +406,7 @@ main(int argc, char **argv)
 			if (errno != 0 || *endp != '\0')
 				usage();
 			break;
+#endif
 		default:
 			usage();
 		}
@@ -470,6 +471,51 @@ main(int argc, char **argv)
 	exit(errs != 0);
 }
 #endif /* DBMULTI_scp stuff */
+
+#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+static
+const char* dropbear_basename(const char* file_name)
+{
+    const char* const basename = strrchr(file_name, '/');
+    return basename != NULL ? basename + 1 : file_name;
+}
+
+static int
+fix_and_accept_name(char** remote_name)
+{
+    int accepted;
+    if (expected_file_name != NULL) {
+        accepted = strcmp(dropbear_basename(*remote_name), dropbear_basename(expected_file_name)) == 0;
+        *remote_name = expected_file_name;
+    } else {
+        accepted = 1;
+    }
+    return accepted;
+}
+
+static int
+accept_size(size_t size)
+{
+    /* expected_file_size > 0 => expected_file_size == size. */
+    return (expected_file_size == 0) || (expected_file_size == size);
+}
+
+#else
+
+int
+fix_and_accept_name(char** remote_name)
+{
+    (void)remote_name;
+    return 1;
+}
+
+static int
+accept_size(size_t size)
+{
+    (void)size;
+    return 1;
+}
+#endif /* DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE */
 
 void
 toremote(char *targ, int argc, char **argv)
@@ -877,8 +923,6 @@ sink(int argc, char **argv)
 	if (stat(targ, &stb) == 0 && S_ISDIR(stb.st_mode))
 		targisdir = 1;
 
-    fprintf(stderr, "DFG: targ='%s', targisdir=%d\n", targ, targisdir);
-
 	for (first = 1;; first = 0) {
 		cp = buf;
 		if (atomicio(read, remin, cp, 1) != 1)
@@ -894,7 +938,6 @@ sink(int argc, char **argv)
 		if (verbose_mode)
 			fprintf(stderr, "Sink: %s", buf);
 
-        fprintf(stderr, "DFG: %d", __LINE__);
 		if (buf[0] == '\01' || buf[0] == '\02') {
 			if (iamremote == 0)
 				(void) atomicio(vwrite, STDERR_FILENO,
@@ -911,7 +954,6 @@ sink(int argc, char **argv)
 		if (ch == '\n')
 			*--cp = 0;
 
-        fprintf(stderr, "DFG: %d", __LINE__);
 		cp = buf;
 		if (*cp == 'T') {
 			setimes++;
@@ -931,7 +973,6 @@ sink(int argc, char **argv)
 			(void) atomicio(vwrite, remout, "", 1);
 			continue;
 		}
-        fprintf(stderr, "DFG: %d", __LINE__);
 		if (*cp != 'C' && *cp != 'D') {
 			/*
 			 * Check for the case "rcp remote:foo\* local:bar".
@@ -947,7 +988,6 @@ sink(int argc, char **argv)
 			SCREWUP("expected control record");
 		}
 
-        fprintf(stderr, "DFG: %d", __LINE__);
 		mode = 0;
 		for (++cp; cp < buf + 5; cp++) {
 			if (*cp < '0' || *cp > '7')
@@ -956,8 +996,6 @@ sink(int argc, char **argv)
 		}
 		if (*cp++ != ' ')
 			SCREWUP("mode not delimited");
-
-        fprintf(stderr, "DFG: %d", __LINE__);
 
 		for (size = 0; isdigit(*cp);)
 			size = size * 10 + (*cp++ - '0');
@@ -1020,7 +1058,15 @@ sink(int argc, char **argv)
 		}
 		omode = mode;
 		mode |= S_IWUSR;
-        fprintf(stderr, "DFG: np='%s'\n", np);
+		if (!fix_and_accept_name(&np)) {
+			run_err("Name not accepted: '%s'. Dropped connection.", np);
+			exit(1);
+		}
+		if (!accept_size(size)) {
+			run_err("Size not accepted: %ld. Dropped connection.", size);
+			exit(1);
+		}
+
 		if ((ofd = open(np, O_WRONLY|O_CREAT, mode)) < 0) {
 bad:			run_err("%s: %s", np, strerror(errno));
 			continue;
