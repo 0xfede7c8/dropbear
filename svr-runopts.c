@@ -111,7 +111,7 @@ static void printhelp(const char * progname) {
 					"-Y <expected_filename>"
 					"-S <expected_file_max_size"
 #endif
-#if DROPBEAR_RESTRICT_FIXED_HOST_IP
+#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
 					"-q <expected_host_ip>"
 #endif
 					,DROPBEAR_VERSION, progname,
@@ -154,8 +154,8 @@ void svr_getopts(int argc, char ** argv) {
 	svr_opts.allowed_path = NULL;
 	svr_opts.allowed_max_size = NULL;
 #endif
-#if DROPBEAR_RESTRICT_FIXED_HOST_IP
-	svr_opts.allowed_host_ip_addr;
+#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
+	svr_opts.allowed_client_ip_addr = NULL;
 #endif
 
 	svr_opts.forkbg = 1;
@@ -306,9 +306,9 @@ void svr_getopts(int argc, char ** argv) {
 					next = &svr_opts.allowed_max_size;
 					break;
 #endif
-#if DROPBEAR_RESTRICT_FIXED_HOST_IP
+#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
 				case 'q':
-					next = &svr_opts.allowed_host_ip_addr;
+					next = &svr_opts.allowed_client_ip_addr;
 					break;
 #endif
 				case 'h':
@@ -468,13 +468,6 @@ void svr_getopts(int argc, char ** argv) {
 		{
 			dropbear_exit("Max file size argument not numeric (-S)");
 		}
-	}
-#endif
-
-#if DROPBEAR_RESTRICT_FIXED_HOST_IP
-	if (svr_opts.allowed_host_ip_addr == NULL)
-	{
-		dropbear_exit("Missing expected host IPv4 address (-q)");
 	}
 #endif
 }

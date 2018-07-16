@@ -134,8 +134,8 @@ typedef struct svr_runopts {
 	char * allowed_path;
 	char * allowed_max_size; //char* as we are going only to handle it to another user
 #endif
-#if DROPBEAR_RESTRICT_FIXED_HOST_IP
-	char * allowed_host_ip_addr;
+#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
+	char * allowed_client_ip_addr;
 #endif
 
 } svr_runopts;

@@ -315,9 +315,8 @@ static void main_noinetd() {
 				getaddrstring(&remoteaddr, NULL, &remote_port, 0);
 				dropbear_log(LOG_INFO, "Child connection from %s:%s", remote_host, remote_port);
 
-				#if DROPBEAR_RESTRICT_FIXED_HOST_IP
-				printf("%s\n%s\n", remote_host, svr_opts.allowed_host_ip_addr);
-				if (strcmp(remote_host, svr_opts.allowed_host_ip_addr))
+				#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
+				if ((svr_opts.allowed_client_ip_addr != NULL) && strcmp(remote_host, svr_opts.allowed_client_ip_addr))
 				{
 					dropbear_exit("Connection from an invalid IP.");
 				}

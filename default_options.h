@@ -315,6 +315,6 @@ the program will ends. */
 #define DROPBEAR_SINGLE_SYNCH_CONNECTION 0
 
 /* Enables accept connection from an specific IP */
-#define DROPBEAR_RESTRICT_FIXED_HOST_IP 0
+#define DROPBEAR_RESTRICT_FIXED_CLIENT_IP 0
 
 #endif /* DROPBEAR_DEFAULT_OPTIONS_H_ */
