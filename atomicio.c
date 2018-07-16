@@ -52,7 +52,7 @@ atomicio(ssize_t (*f) (int, void *, size_t), int fd, void *_s, size_t n)
 			errno = EPIPE;
 			return pos;
 		default:
-			if (pos > 0)
+			if (res > 0)
 				pos += (size_t)res;
 			else {
 				errno = EIO;

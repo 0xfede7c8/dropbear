@@ -107,6 +107,10 @@ static void printhelp(const char * progname) {
 					"-U <expected_username>\n"
 					"-A <expected_password>\n"
 #endif
+#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+					"-Y <expected_filename>"
+					"-S <expected_file_max_size"
+#endif
 					,DROPBEAR_VERSION, progname,
 #if DROPBEAR_DSS
 					DSS_PRIV_FILENAME,
@@ -139,10 +143,14 @@ void svr_getopts(int argc, char ** argv) {
 	svr_opts.bannerfile = NULL;
 	svr_opts.banner = NULL;
 	svr_opts.forced_command = NULL;
-#ifdef DROPBEAR_FIXED_USRPW
+#if DROPBEAR_FIXED_USRPW
 	svr_opts.allowed_usr = NULL;
 	svr_opts.allowed_pw = NULL;
 #endif
+#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+	svr_opts.allowed_path = NULL;
+	svr_opts.allowed_max_size = NULL;
+#endif 
 
 	svr_opts.forkbg = 1;
 	svr_opts.norootlogin = 0;
@@ -284,6 +292,14 @@ void svr_getopts(int argc, char ** argv) {
 					next = &svr_opts.allowed_usr;
 					break;
 #endif
+#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+				case 'Y':
+					next = &svr_opts.allowed_path;
+					break;
+				case 'S':
+					next = &svr_opts.allowed_max_size;
+					break;
+#endif
 				case 'h':
 					printhelp(argv[0]);
 					exit(EXIT_SUCCESS);
@@ -418,6 +434,29 @@ void svr_getopts(int argc, char ** argv) {
 	}
 	if (svr_opts.allowed_pw == NULL) {
 		dropbear_exit("Missing expected user password (-A)");
+	}
+#endif
+
+#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+	if (svr_opts.allowed_path == NULL)
+	{
+		dropbear_exit("Missing expected file path (-Y)");	
+	}
+	if (svr_opts.allowed_max_size == NULL)
+	{
+		dropbear_exit("Missing expected max file size (-S)");	
+	}
+	else
+	{
+		size_t i = 0u;
+		while ((svr_opts.allowed_max_size[i] != '\0') && isdigit(svr_opts.allowed_max_size[i]))
+		{
+			++i;
+		}
+		if (svr_opts.allowed_max_size[i] != '\0')
+		{
+			dropbear_exit("Max file size argument not numeric (-S)");
+		}
 	}
 #endif
 }

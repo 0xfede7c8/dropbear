@@ -685,28 +685,83 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 		if (chansess->cmd == NULL) {
 			chansess->cmd = buf_getstring(ses.payload, &cmdlen);
 
-			if (cmdlen > MAX_CMD_LEN) {
-				m_free(chansess->cmd);
-				/* TODO - send error - too long ? */
-				return DROPBEAR_FAILURE;
-			}
-			#if DROPBEAR_ONLY_ALLOW_EXEC_SCP
-				#if DROPBEAR_EXEC_REQUEST
-					#define SCP_STRING "scp"
-					if (strncmp(chansess->cmd, SCP_STRING, sizeof(SCP_STRING) - 1) != 0)
-					{
+			#if !DROPBEAR_EXEC_REQUEST && DROPBEAR_ONLY_ALLOW_EXEC_SCP
+				#error "DROPBEAR_EXEC_REQUEST should be enabled if DROPBEAR_ONLY_ALLOW_EXEC_SCP is enabled."
+			#endif
+
+			#if DROPBEAR_EXEC_REQUEST
+				if (cmdlen > MAX_CMD_LEN) {
+					m_free(chansess->cmd);
+					/* TODO - send error - too long ? */
+					return DROPBEAR_FAILURE;
+				}
+
+				#define SCP_STRING "scp"
+				if (strncmp(chansess->cmd, SCP_STRING, sizeof(SCP_STRING) - 1) != 0)
+				{
+					#if DROPBEAR_ONLY_ALLOW_EXEC_SCP
 						#if LOG_COMMANDS
 							dropbear_log(LOG_WARNING, "User %s trying to execute '%s'. Only allowed command is scp. Aborting.",
 												ses.authstate.pw_name, chansess->cmd);
 						#endif
 						m_free(chansess->cmd);
-						return DROPBEAR_FAILURE;
+						return DROPBEAR_FAILURE;	
+					#endif
+				}
+				else
+				{
+					#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
+					#define PATH_CHECKING_ARG "-Y"
+					#define MAX_SIZE_CHECKING_ARG "-s"
+					#define WHITESPACES_EXTRA_ALLOC 5u
+					// We call local scp because DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE make it incompatible with standar scp implementations.
+					#ifdef DROPBEAR_MULTI
+						#define SCP_CMD "./dropbearmulti scp"
+					#else
+						#define SCP_CMD "./scp"
+					#endif
+					// We build the command again with the neccessary prefixes.
+					const size_t newcmdsz = strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG) + sizeof(MAX_SIZE_CHECKING_ARG) + sizeof(SCP_CMD) + WHITESPACES_EXTRA_ALLOC;
+					char* const newcmd = m_malloc(newcmdsz);
+					if (newcmd != NULL)
+					{	
+						const int amountWritten = snprintf(newcmd, newcmdsz, "%s %s %s %s %s %s",
+							SCP_CMD,
+							PATH_CHECKING_ARG,
+							svr_opts.allowed_path,
+							MAX_SIZE_CHECKING_ARG,
+							svr_opts.allowed_max_size,
+							chansess->cmd + 4); // To remove the "scp "
+
+						m_free(chansess->cmd);
+						if ((amountWritten > 0) && ((size_t)amountWritten < newcmdsz))
+						{
+							chansess->cmd = newcmd;
+						}
+						else
+						{
+							chansess->cmd = NULL;
+							TRACE(("Couldn't generate new command. snprintf failed"))
+							return DROPBEAR_FAILURE;
+						}
 					}
-				#else
-					#error "DROPBEAR_EXEC_REQUEST should be enabled if DROPBEAR_ONLY_ALLOW_EXEC_SCP is enabled."
-				#endif
+					else
+					{
+						TRACE(("Malloc failed."))
+						m_free(chansess->cmd);
+						return DROPBEAR_FAILURE;	
+					}
+					#endif
+				}
+
+
+			#else
+				dropbear_log(LOG_WARNING, "Exec requests disabled. Aborting.");
+				m_free(chansess->cmd);
+				return DROPBEAR_FAILURE;
 			#endif
 		}
+
 		if (issubsys) {
 #if DROPBEAR_SFTPSERVER
 			if ((cmdlen == 4) && strncmp(chansess->cmd, "sftp", 4) == 0) {

@@ -303,11 +303,11 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 /* Allows only to receive a SCP command. DROPBEAR_EXEC_REQUEST should be enabled*/
 #define DROPBEAR_ONLY_ALLOW_EXEC_SCP 0
 
-/* Limit the amount of total connections allowed. 0 means infinite */
-#define MAX_TOTAL_CONNECTIONS 0
-
 /* Use a command-line provided user and password instead of using system's userbase. */
 #define DROPBEAR_FIXED_USRPW 0
+
+/* Enables checking of specific location and size to copy files. Path sent by client should match path provided by server options.*/
+#define DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE 0
 
 /* Use this to allow just a single synchronous connection, i.e. the application will allow
 just one connection, and it will stay waiting for the end of the connection, after that
