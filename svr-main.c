@@ -316,7 +316,6 @@ static void main_noinetd() {
 				dropbear_log(LOG_INFO, "Child connection from %s:%s", remote_host, remote_port);
 
 				#if DROPBEAR_RESTRICT_FIXED_HOST_IP
-				#define MAX_IPV4_LEN 9
 				printf("%s\n%s\n", remote_host, svr_opts.allowed_host_ip_addr);
 				if (strcmp(remote_host, svr_opts.allowed_host_ip_addr))
 				{
