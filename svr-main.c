@@ -93,6 +93,7 @@ static void main_inetd() {
 	/* In case our inetd was lax in logging source addresses */
 	get_socket_address(0, NULL, NULL, &host, &port, 0);
 	dropbear_log(LOG_INFO, "Child connection from %s:%s", host, port);
+
 	m_free(host);
 	m_free(port);
 
@@ -313,6 +314,15 @@ static void main_noinetd() {
 
 				getaddrstring(&remoteaddr, NULL, &remote_port, 0);
 				dropbear_log(LOG_INFO, "Child connection from %s:%s", remote_host, remote_port);
+
+				#if DROPBEAR_RESTRICT_FIXED_HOST_IP
+				#define MAX_IPV4_LEN 9
+				printf("%s\n%s\n", remote_host, svr_opts.allowed_host_ip_addr);
+				if (strcmp(remote_host, svr_opts.allowed_host_ip_addr))
+				{
+					dropbear_exit("Connection from an invalid IP.");
+				}
+				#endif
 				m_free(remote_host);
 				m_free(remote_port);
 

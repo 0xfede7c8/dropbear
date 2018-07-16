@@ -314,4 +314,7 @@ just one connection, and it will stay waiting for the end of the connection, aft
 the program will ends. */
 #define DROPBEAR_SINGLE_SYNCH_CONNECTION 0
 
+/* Enables accept connection from an specific IP */
+#define DROPBEAR_RESTRICT_FIXED_HOST_IP 0
+
 #endif /* DROPBEAR_DEFAULT_OPTIONS_H_ */
