@@ -705,7 +705,7 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 												ses.authstate.pw_name, chansess->cmd);
 						#endif
 						m_free(chansess->cmd);
-						return DROPBEAR_FAILURE;	
+						return DROPBEAR_FAILURE;
 					#endif
 				}
 				else
@@ -713,7 +713,7 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 					#if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
 					#define PATH_CHECKING_ARG "-Y"
 					#define MAX_SIZE_CHECKING_ARG "-s"
-					#define WHITESPACES_EXTRA_ALLOC 5u
+					#define WHITESPACES_EXTRA_ALLOC 10u    /* 5 should be fine, but just in case. */
 					// We call local scp because DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE make it incompatible with standar scp implementations.
 					#ifdef DROPBEAR_MULTI
 						#define SCP_CMD "./dropbearmulti scp"
@@ -724,7 +724,7 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 					const size_t newcmdsz = strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG) + sizeof(MAX_SIZE_CHECKING_ARG) + sizeof(SCP_CMD) + WHITESPACES_EXTRA_ALLOC;
 					char* const newcmd = m_malloc(newcmdsz);
 					if (newcmd != NULL)
-					{	
+					{
 						const int amountWritten = snprintf(newcmd, newcmdsz, "%s %s %s %s %s %s",
 							SCP_CMD,
 							PATH_CHECKING_ARG,
@@ -749,7 +749,7 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 					{
 						TRACE(("Malloc failed."))
 						m_free(chansess->cmd);
-						return DROPBEAR_FAILURE;	
+						return DROPBEAR_FAILURE;
 					}
 					#endif
 				}

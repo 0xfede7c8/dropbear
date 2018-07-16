@@ -1,19 +1,19 @@
 /*
  * Dropbear SSH
- * 
+ *
  * Copyright (c) 2002-2004 Matt Johnston
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,7 +39,7 @@
 static void send_msg_channel_open_failure(unsigned int remotechan, int reason,
 		const char *text, const char *lang);
 static void send_msg_channel_open_confirmation(const struct Channel* channel,
-		unsigned int recvwindow, 
+		unsigned int recvwindow,
 		unsigned int recvmaxpacket);
 static int writechannel(struct Channel* channel, int fd, circbuffer *cbuf,
 	const unsigned char *moredata, unsigned int *morelen);
@@ -103,15 +103,15 @@ void chancleanup() {
 /* If remotechan, transwindow and transmaxpacket are not know (for a new
  * outgoing connection, with them to be filled on confirmation), they should
  * all be set to 0 */
-static struct Channel* newchannel(unsigned int remotechan, 
-		const struct ChanType *type, 
+static struct Channel* newchannel(unsigned int remotechan,
+		const struct ChanType *type,
 		unsigned int transwindow, unsigned int transmaxpacket) {
 
 	struct Channel * newchan;
 	unsigned int i, j;
 
 	TRACE(("enter newchannel"))
-	
+
 	/* first see if we can use existing channels */
 	for (i = 0; i < ses.chansize; i++) {
 		if (ses.channels[i] == NULL) {
@@ -138,7 +138,7 @@ static struct Channel* newchannel(unsigned int remotechan,
 		}
 
 	}
-	
+
 	newchan = (struct Channel*)m_malloc(sizeof(struct Channel));
 	newchan->type = type;
 	newchan->index = i;
@@ -149,7 +149,7 @@ static struct Channel* newchannel(unsigned int remotechan,
 	newchan->remotechan = remotechan;
 	newchan->transwindow = transwindow;
 	newchan->transmaxpacket = transmaxpacket;
-	
+
 	newchan->typedata = NULL;
 	newchan->writefd = FD_UNINIT;
 	newchan->readfd = FD_UNINIT;
@@ -223,7 +223,7 @@ void channelio(const fd_set *readfds, const fd_set *writefds) {
 		}
 
 		/* read stderr data and send it over the wire */
-		if (ERRFD_IS_READ(channel) && channel->errfd >= 0 
+		if (ERRFD_IS_READ(channel) && channel->errfd >= 0
 			&& FD_ISSET(channel->errfd, readfds)) {
 				TRACE(("send normal errfd"))
 				send_msg_channel_data(channel, 1);
@@ -235,7 +235,7 @@ void channelio(const fd_set *readfds, const fd_set *writefds) {
 			writechannel(channel, channel->writefd, channel->writebuf, NULL, NULL);
 			do_check_close = 1;
 		}
-		
+
 		/* stderr for client mode */
 		if (ERRFD_IS_WRITE(channel)
 				&& channel->errfd >= 0 && FD_ISSET(channel->errfd, writefds)) {
@@ -247,7 +247,7 @@ void channelio(const fd_set *readfds, const fd_set *writefds) {
 			/* SIGCHLD can change channel state for server sessions */
 			do_check_close = 1;
 		}
-	
+
 		/* handle any channel closing etc */
 		if (do_check_close) {
 			check_close(channel);
@@ -266,7 +266,7 @@ static unsigned int write_pending(const struct Channel * channel) {
 
 	if (channel->writefd >= 0 && cbuf_getused(channel->writebuf) > 0) {
 		return 1;
-	} else if (channel->errfd >= 0 && channel->extrabuf && 
+	} else if (channel->errfd >= 0 && channel->extrabuf &&
 			cbuf_getused(channel->extrabuf) > 0) {
 		return 1;
 	}
@@ -285,19 +285,19 @@ static void check_close(struct Channel *channel) {
 				channel->writebuf ? cbuf_getused(channel->writebuf) : 0,
 				channel->extrabuf ? cbuf_getused(channel->extrabuf) : 0))
 
-	if (!channel->flushing 
+	if (!channel->flushing
 		&& !channel->close_handler_done
 		&& channel->type->check_close
 		&& channel->type->check_close(channel))
 	{
 		channel->flushing = 1;
 	}
-	
+
 	/* if a type-specific check_close is defined we will only exit
 	   once that has been triggered. this is only used for a server "session"
-	   channel, to ensure that the shell has exited (and the exit status 
+	   channel, to ensure that the shell has exited (and the exit status
 	   retrieved) before we close things up. */
-	if (!channel->type->check_close	
+	if (!channel->type->check_close
 		|| channel->close_handler_done
 		|| channel->type->check_close(channel)) {
 		close_allowed = 1;
@@ -327,7 +327,7 @@ static void check_close(struct Channel *channel) {
 			TRACE(("send data readfd"))
 			send_msg_channel_data(channel, 0);
 		}
-		if (ERRFD_IS_READ(channel) && channel->errfd >= 0 
+		if (ERRFD_IS_READ(channel) && channel->errfd >= 0
 			&& channel->transwindow > 0) {
 			TRACE(("send data errfd"))
 			send_msg_channel_data(channel, 1);
@@ -336,7 +336,7 @@ static void check_close(struct Channel *channel) {
 
 	/* If we're not going to send any more data, send EOF */
 	if (!channel->sent_eof
-			&& channel->readfd == FD_CLOSED 
+			&& channel->readfd == FD_CLOSED
 			&& (ERRFD_IS_WRITE(channel) || channel->errfd == FD_CLOSED)) {
 		send_msg_channel_eof(channel);
 	}
@@ -385,12 +385,12 @@ void channel_connect_done(int result, int sock, void* user_data, const char* UNU
 static void send_msg_channel_close(struct Channel *channel) {
 
 	TRACE(("enter send_msg_channel_close %p", (void*)channel))
-	if (channel->type->closehandler 
+	if (channel->type->closehandler
 			&& !channel->close_handler_done) {
 		channel->type->closehandler(channel);
 		channel->close_handler_done = 1;
 	}
-	
+
 	CHECKCLEARTOWRITE();
 
 	buf_putbyte(ses.writepayload, SSH_MSG_CHANNEL_CLOSE);
@@ -520,7 +520,7 @@ static int writechannel_writev(struct Channel* channel, int fd, circbuffer *cbuf
 }
 #endif /* HAVE_WRITEV */
 
-/* Called to write data out to the local side of the channel. 
+/* Called to write data out to the local side of the channel.
    Writes the circular buffer contents and also the "moredata" buffer
    if not null. Will ignore EAGAIN.
    Returns DROPBEAR_FAILURE if writing to fd had an error and the channel is being closed, DROPBEAR_SUCCESS otherwise */
@@ -545,7 +545,7 @@ static int writechannel(struct Channel* channel, int fd, circbuffer *cbuf,
 	dropbear_assert(channel->recvwindow <= cbuf_getavail(channel->writebuf));
 	dropbear_assert(channel->extrabuf == NULL ||
 			channel->recvwindow <= cbuf_getavail(channel->extrabuf));
-	
+
 	TRACE(("leave writechannel"))
 	return ret;
 }
@@ -554,10 +554,10 @@ static int writechannel(struct Channel* channel, int fd, circbuffer *cbuf,
 /* Set the file descriptors for the main select in session.c
  * This avoid channels which don't have any window available, are closed, etc*/
 void setchannelfds(fd_set *readfds, fd_set *writefds, int allow_reads) {
-	
+
 	unsigned int i;
 	struct Channel * channel;
-	
+
 	for (i = 0; i < ses.chansize; i++) {
 
 		channel = ses.channels[i];
@@ -565,10 +565,10 @@ void setchannelfds(fd_set *readfds, fd_set *writefds, int allow_reads) {
 			continue;
 		}
 
-		/* Stuff to put over the wire. 
-		Avoid queueing data to send if we're in the middle of a 
-		key re-exchange (!dataallowed), but still read from the 
-		FD if there's the possibility of "~."" to kill an 
+		/* Stuff to put over the wire.
+		Avoid queueing data to send if we're in the middle of a
+		key re-exchange (!dataallowed), but still read from the
+		FD if there's the possibility of "~."" to kill an
 		interactive session (the read_mangler) */
 		if (channel->transwindow > 0
 		   && ((ses.dataallowed && allow_reads) || channel->read_mangler)) {
@@ -576,7 +576,7 @@ void setchannelfds(fd_set *readfds, fd_set *writefds, int allow_reads) {
 			if (channel->readfd >= 0) {
 				FD_SET(channel->readfd, readfds);
 			}
-			
+
 			if (ERRFD_IS_READ(channel) && channel->errfd >= 0) {
 					FD_SET(channel->errfd, readfds);
 			}
@@ -587,7 +587,7 @@ void setchannelfds(fd_set *readfds, fd_set *writefds, int allow_reads) {
 				FD_SET(channel->writefd, writefds);
 		}
 
-		if (ERRFD_IS_WRITE(channel) && channel->errfd >= 0 
+		if (ERRFD_IS_WRITE(channel) && channel->errfd >= 0
 				&& cbuf_getused(channel->extrabuf) > 0) {
 				FD_SET(channel->errfd, writefds);
 		}
@@ -695,7 +695,7 @@ void recv_msg_channel_request() {
 		return;
 	}
 
-	if (channel->type->reqhandler 
+	if (channel->type->reqhandler
 			&& !channel->close_handler_done) {
 		channel->type->reqhandler(channel);
 	} else {
@@ -736,9 +736,9 @@ static void send_msg_channel_data(struct Channel *channel, int isextended) {
 	dropbear_assert(fd >= 0);
 
 	maxlen = MIN(channel->transwindow, channel->transmaxpacket);
-	/* -(1+4+4) is SSH_MSG_CHANNEL_DATA, channel number, string length, and 
+	/* -(1+4+4) is SSH_MSG_CHANNEL_DATA, channel number, string length, and
 	 * exttype if is extended */
-	maxlen = MIN(maxlen, 
+	maxlen = MIN(maxlen,
 			ses.writepayload->size - 1 - 4 - 4 - (isextended ? 4 : 0));
 	TRACE(("maxlen %zd", maxlen))
 	if (maxlen == 0) {
@@ -746,7 +746,7 @@ static void send_msg_channel_data(struct Channel *channel, int isextended) {
 		return;
 	}
 
-	buf_putbyte(ses.writepayload, 
+	buf_putbyte(ses.writepayload,
 			isextended ? SSH_MSG_CHANNEL_EXTENDED_DATA : SSH_MSG_CHANNEL_DATA);
 	buf_putint(ses.writepayload, channel->remotechan);
 	if (isextended) {
@@ -768,7 +768,7 @@ static void send_msg_channel_data(struct Channel *channel, int isextended) {
 		}
 		buf_setpos(ses.writepayload, 0);
 		buf_setlen(ses.writepayload, 0);
-		TRACE(("leave send_msg_channel_data: len %d read err %d or EOF for fd %d", 
+		TRACE(("leave send_msg_channel_data: len %d read err %d or EOF for fd %d",
 					len, errno, fd))
 		return;
 	}
@@ -791,7 +791,7 @@ static void send_msg_channel_data(struct Channel *channel, int isextended) {
 	channel->transwindow -= len;
 
 	encrypt_packet();
-	
+
 	/* If we receive less data than we requested when flushing, we've
 	   reached the equivalent of EOF */
 	if (channel->flushing && len < (ssize_t)maxlen)
@@ -814,7 +814,7 @@ void recv_msg_channel_data() {
 
 /* Shared for data and stderr data - when we receive data, put it in a buffer
  * for writing to the local file descriptor */
-void common_recv_msg_channel_data(struct Channel *channel, int fd, 
+void common_recv_msg_channel_data(struct Channel *channel, int fd,
 		circbuffer * cbuf) {
 
 	unsigned int datalen;
@@ -871,7 +871,7 @@ void common_recv_msg_channel_data(struct Channel *channel, int fd,
 			buflen = cbuf_writelen(cbuf);
 			buflen = MIN(buflen, len);
 
-			memcpy(cbuf_writeptr(cbuf, buflen), 
+			memcpy(cbuf_writeptr(cbuf, buflen),
 					buf_getptr(ses.payload, buflen), buflen);
 			cbuf_incrwrite(cbuf, buflen);
 			buf_incrpos(ses.payload, buflen);
@@ -889,13 +889,13 @@ void recv_msg_channel_window_adjust() {
 
 	struct Channel * channel;
 	unsigned int incr;
-	
+
 	channel = getchannel();
-	
+
 	incr = buf_getint(ses.payload);
 	TRACE(("received window increment %d", incr))
 	incr = MIN(incr, TRANS_MAX_WIN_INCR);
-	
+
 	channel->transwindow += incr;
 	channel->transwindow = MIN(channel->transwindow, TRANS_MAX_WINDOW);
 
@@ -915,7 +915,7 @@ static void send_msg_channel_window_adjust(const struct Channel* channel,
 
 	encrypt_packet();
 }
-	
+
 /* Handle a new channel request, performing any channel-type-specific setup */
 void recv_msg_channel_open() {
 
@@ -948,7 +948,7 @@ void recv_msg_channel_open() {
 	/* Get the channel type. Client and server style invokation will set up a
 	 * different list for ses.chantypes at startup. We just iterate through
 	 * this list and find the matching name */
-	for (cp = &ses.chantypes[0], chantype = (*cp); 
+	for (cp = &ses.chantypes[0], chantype = (*cp);
 			chantype != NULL;
 			cp++, chantype = (*cp)) {
 		if (strcmp(type, chantype->name) == 0) {
@@ -1001,7 +1001,7 @@ failure:
 
 cleanup:
 	m_free(type);
-	
+
 	update_channel_prio();
 
 	TRACE(("leave recv_msg_channel_open"))
@@ -1035,12 +1035,12 @@ void send_msg_channel_success(const struct Channel *channel) {
 
 /* Send a channel open failure message, with a corresponding reason
  * code (usually resource shortage or unknown chan type) */
-static void send_msg_channel_open_failure(unsigned int remotechan, 
+static void send_msg_channel_open_failure(unsigned int remotechan,
 		int reason, const char *text, const char *lang) {
 
 	TRACE(("enter send_msg_channel_open_failure"))
 	CHECKCLEARTOWRITE();
-	
+
 	buf_putbyte(ses.writepayload, SSH_MSG_CHANNEL_OPEN_FAILURE);
 	buf_putint(ses.writepayload, remotechan);
 	buf_putint(ses.writepayload, reason);
@@ -1054,7 +1054,7 @@ static void send_msg_channel_open_failure(unsigned int remotechan,
 /* Confirm a channel open, and let the remote end know what number we've
  * allocated and the receive parameters */
 static void send_msg_channel_open_confirmation(const struct Channel* channel,
-		unsigned int recvwindow, 
+		unsigned int recvwindow,
 		unsigned int recvmaxpacket) {
 
 	TRACE(("enter send_msg_channel_open_confirmation"))
@@ -1103,9 +1103,9 @@ static void close_chan_fd(struct Channel *channel, int fd, int how) {
 		channel->errfd = FD_CLOSED;
 	}
 
-	/* if we called shutdown on it and all references are gone, then we 
+	/* if we called shutdown on it and all references are gone, then we
 	 * need to close() it to stop it lingering */
-	if (channel->type->sepfds && channel->readfd == FD_CLOSED 
+	if (channel->type->sepfds && channel->readfd == FD_CLOSED
 		&& channel->writefd == FD_CLOSED && channel->errfd == FD_CLOSED) {
 		TRACE(("CLOSE (finally) of %d", fd))
 		m_close(fd);
@@ -1154,7 +1154,7 @@ int send_msg_channel_open_init(int fd, const struct ChanType *type) {
 	return DROPBEAR_SUCCESS;
 }
 
-/* Confirmation that our channel open request (for forwardings) was 
+/* Confirmation that our channel open request (for forwardings) was
  * successful*/
 void recv_msg_channel_open_confirmation() {
 
@@ -1173,8 +1173,8 @@ void recv_msg_channel_open_confirmation() {
 	channel->remotechan =  buf_getint(ses.payload);
 	channel->transwindow = buf_getint(ses.payload);
 	channel->transmaxpacket = buf_getint(ses.payload);
-	
-	TRACE(("new chan remote %d local %d", 
+
+	TRACE(("new chan remote %d local %d",
 				channel->remotechan, channel->index))
 
 	/* Run the inithandler callback */
@@ -1191,7 +1191,7 @@ void recv_msg_channel_open_confirmation() {
 		channel->prio = DROPBEAR_CHANNEL_PRIO_BULK;
 	}
 	update_channel_prio();
-	
+
 	TRACE(("leave recv_msg_channel_open_confirmation"))
 }
 
