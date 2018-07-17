@@ -35,7 +35,7 @@ static size_t listensockets(int *sock, size_t sockcount, int *maxfd);
 static void sigchld_handler(int dummy);
 static void sigsegv_handler(int);
 static void sigintterm_handler(int fish);
-static int validate_client_ip(const char*, const char*);
+static int validate_client_ip(const char* remote_host, const char* allowed_client_ip_addr);
 #if INETD_MODE
 static void main_inetd(void);
 #endif
@@ -316,7 +316,7 @@ static void main_noinetd() {
 				getaddrstring(&remoteaddr, NULL, &remote_port, 0);
 				dropbear_log(LOG_INFO, "Child connection from %s:%s", remote_host, remote_port);
 
-				if (validate_client_ip(remote_host, svr_opts.allowed_client_ip_addr))
+				if (!validate_client_ip(remote_host, svr_opts.allowed_client_ip_addr))
 				{
 					dropbear_exit("Connection from an invalid IP.");
 				}
@@ -359,14 +359,14 @@ out:
 #if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
 static int validate_client_ip(const char* remote_host, const char* allowed_client_ip_addr)
 {
-	return (allowed_client_ip_addr != NULL) && (strcmp(remote_host, allowed_client_ip_addr) != 0);
+	return (allowed_client_ip_addr == NULL) || (strcmp(remote_host, allowed_client_ip_addr) == 0);
 }
 #else
 static int validate_client_ip(const char* remote_host, const char* allowed_client_ip_addr)
 {
 	(void)remote_host;
 	(void)allowed_client_ip_addr;
-	return 0;
+	return 1;
 }
 #endif
 
