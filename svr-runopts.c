@@ -111,6 +111,9 @@ static void printhelp(const char * progname) {
 					"-Y <expected_filename>"
 					"-S <expected_file_max_size"
 #endif
+#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
+					"-q <expected_host_ip>"
+#endif
 					,DROPBEAR_VERSION, progname,
 #if DROPBEAR_DSS
 					DSS_PRIV_FILENAME,
@@ -150,7 +153,10 @@ void svr_getopts(int argc, char ** argv) {
 #if DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE
 	svr_opts.allowed_path = NULL;
 	svr_opts.allowed_max_size = NULL;
-#endif 
+#endif
+#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
+	svr_opts.allowed_client_ip_addr = NULL;
+#endif
 
 	svr_opts.forkbg = 1;
 	svr_opts.norootlogin = 0;
@@ -298,6 +304,11 @@ void svr_getopts(int argc, char ** argv) {
 					break;
 				case 'S':
 					next = &svr_opts.allowed_max_size;
+					break;
+#endif
+#if DROPBEAR_RESTRICT_FIXED_CLIENT_IP
+				case 'q':
+					next = &svr_opts.allowed_client_ip_addr;
 					break;
 #endif
 				case 'h':
