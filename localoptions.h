@@ -2,9 +2,9 @@
 #define LOCALOPTIONS_H
 
 //Should be changed
-#define DSS_PRIV_FILENAME "/etc/dropbear/dropbear_dss_host_key"
-#define RSA_PRIV_FILENAME "/etc/dropbear/dropbear_rsa_host_key"
-#define ECDSA_PRIV_FILENAME "/etc/dropbear/dropbear_ecdsa_host_key"
+#define DSS_PRIV_FILENAME "/etc/eclypsium/.safe_box/dropbear_dss_host_key"
+#define RSA_PRIV_FILENAME "/etc/eclypsium/.safe_box/dropbear_rsa_host_key"
+#define ECDSA_PRIV_FILENAME "/etc/eclypsium/.safe_box/dropbear_ecdsa_host_key"
 
 
 /* Set NON_INETD_MODE if you require daemon functionality (ie Dropbear listens
