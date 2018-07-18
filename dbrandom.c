@@ -88,7 +88,7 @@ process_file(hash_state *hs, const char *filename,
  			timeout.tv_sec  = 2;
  			timeout.tv_usec = 0;
 
-			DROPBEAR_FD_ZERO(&read_fds);
+			FD_ZERO(&read_fds);
 			FD_SET(readfd, &read_fds);
 			res = select(readfd + 1, &read_fds, NULL, NULL, &timeout);
 			if (res == 0)

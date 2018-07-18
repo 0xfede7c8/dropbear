@@ -148,8 +148,8 @@ void session_loop(void(*loophandler)(void)) {
 
 		timeout.tv_sec = select_timeout();
 		timeout.tv_usec = 0;
-		DROPBEAR_FD_ZERO(&writefd);
-		DROPBEAR_FD_ZERO(&readfd);
+		FD_ZERO(&writefd);
+		FD_ZERO(&readfd);
 		dropbear_assert(ses.payload == NULL);
 
 		/* We get woken up when signal handlers write to this pipe.
@@ -195,8 +195,8 @@ void session_loop(void(*loophandler)(void)) {
 			 * want to iterate over channels etc for reading, to handle
 			 * server processes exiting etc.
 			 * We don't want to read/write FDs. */
-			DROPBEAR_FD_ZERO(&writefd);
-			DROPBEAR_FD_ZERO(&readfd);
+			FD_ZERO(&writefd);
+			FD_ZERO(&readfd);
 		}
 
 		/* We'll just empty out the pipe if required. We don't do
@@ -387,7 +387,7 @@ static int ident_readln(int fd, char* buf, int count) {
 		return -1;
 	}
 
-	DROPBEAR_FD_ZERO(&fds);
+	FD_ZERO(&fds);
 
 	/* select since it's a non-blocking fd */
 

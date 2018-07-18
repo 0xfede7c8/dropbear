@@ -178,7 +178,7 @@ static void main_noinetd() {
 	}
 
 	for(;;) {
-		DROPBEAR_FD_ZERO(&fds);
+		FD_ZERO(&fds);
 
 		/* listening sockets */
 		for (i = 0; i < listensockcount; i++) {
