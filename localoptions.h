@@ -62,4 +62,8 @@
 
 #define DROPBEAR_RESTRICT_FIXED_CLIENT_IP 1
 
+// We don't have an entry on default_options.h for SCP_PATH because we want to check existance.
+// If its needed the preprocessor will tell you
+#define SCP_PATH "/usr/bin/EclypsiumDropbear scp"
+
 #endif /* LOCALOPTIONS_H */
