@@ -714,19 +714,17 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 					#define PATH_CHECKING_ARG "-Y"
 					#define MAX_SIZE_CHECKING_ARG "-s"
 					#define WHITESPACES_EXTRA_ALLOC 10u    /* 5 should be fine, but just in case. */
-					// We call local scp because DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE make it incompatible with standar scp implementations.
-					#ifdef DROPBEAR_MULTI
-						#define SCP_CMD "./dropbearmulti scp"
-					#else
-						#define SCP_CMD "./scp"
+					// 
+					#ifndef SCP_PATH
+						#error "Need to specify a SCP_PATH for a custom scp because DROPBEAR_SCP_FIXED_FILE_PATH_AND_SIZE is incompatible with standar scp implementations." 
 					#endif
 					// We build the command again with the neccessary prefixes.
-					const size_t newcmdsz = strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG) + sizeof(MAX_SIZE_CHECKING_ARG) + sizeof(SCP_CMD) + WHITESPACES_EXTRA_ALLOC;
+					const size_t newcmdsz = strlen(svr_opts.allowed_path) + strlen(svr_opts.allowed_max_size) + cmdlen + sizeof(PATH_CHECKING_ARG) + sizeof(MAX_SIZE_CHECKING_ARG) + sizeof(SCP_PATH) + WHITESPACES_EXTRA_ALLOC;
 					char* const newcmd = m_malloc(newcmdsz);
 					if (newcmd != NULL)
 					{
 						const int amountWritten = snprintf(newcmd, newcmdsz, "%s %s %s %s %s %s",
-							SCP_CMD,
+							SCP_PATH,
 							PATH_CHECKING_ARG,
 							svr_opts.allowed_path,
 							MAX_SIZE_CHECKING_ARG,
@@ -753,8 +751,6 @@ static int sessioncommand(struct Channel *channel, struct ChanSess *chansess,
 					}
 					#endif
 				}
-
-
 			#else
 				dropbear_log(LOG_WARNING, "Exec requests disabled. Aborting.");
 				m_free(chansess->cmd);
